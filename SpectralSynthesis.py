@@ -34,47 +34,27 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     
     """
     
-    i, j = np.meshgrid(np.linspace(0,N-1,N),np.linspace(0,N-1,N))
-    
-    A = np.zeros((N,N), dtype = np.complex)
     if Seed != None:
-        np.random.seed(int(Seed))
-    return i,j
+        np.random.seed(int(Seed))  
         
-'''        
-    for i in range(0,int(N/2)+1):
-    	for j in range(0,int(N/2)+1):
+    i, j = np.meshgrid(range(1,int(N/2)+1),range(1,int(N/2)+1))
+    phase = 2*np.pi*np.random.random((int(N/2),int(N/2)))
+    rad = (i*i+j*j)**(-(H+1)/2)*np.random.normal(size=(int(N/2),int(N/2)))
+    
+    first = rad*np.cos(phase)+rad*np.sin(phase)*1j
+    third = np.rot90(rad*np.cos(phase)-rad*np.sin(phase)*1j, k = 2)
+    
+    phase = 2*np.pi*np.random.random((int(N/2),int(N/2)))
+    rad = (i*i+j*j)**(-(H+1)/2)*np.random.normal(size=(int(N/2),int(N/2)))
+        
+    second = np.rot90(rad*np.cos(phase)+rad*np.sin(phase)*1j, k = 3)
+    fourth = np.rot90(rad*np.cos(phase)-rad*np.sin(phase)*1j, k = 1)
+    
+    firstsecond = np.concatenate((first,second), axis = 1)
+    thirdfourth = np.concatenate((fourth,third), axis = 1)
+    
+    A = np.concatenate((firstsecond, thirdfourth), axis = 0)               
 
-    		phase = 2*np.pi*np.random.random()
-    
-    		if (i!=0) or (j!=0):
-    			rad = (i*i+j*j)**(-(H+1)/2)*np.random.normal()
-    		else:
-    			rad=0
-    		A[i,j] = rad*np.cos(phase)+rad*np.sin(phase)*1j
-    
-    		if i==0:
-    			i0 = 0
-    		else:
-    			i0=N-i
-    		if j==0:
-    			j0=0
-    		else:
-    			j0=N-j
-    		A[i0,j0]=rad*np.cos(phase)-rad*np.sin(phase)*1j
-     
-    for i in range(1,int(N/2)):
-    	for j in range(1,int(N/2)):
-    		phase = 2*np.pi*np.random.random()
-    		rad = (i*i+j*j)**(-(H+1)/2)*np.random.normal()
-    		A[i,N-j] = rad*np.cos(phase)+rad*np.sin(phase)*1j
-    		A[N-i,j] = rad*np.cos(phase)-rad*np.sin(phase)*1j
-            
-    np.savetxt('A.txt', A.imag)
-    plt.figure()
-    plt.imshow(np.log(np.abs(A.imag)))
-    plt.colorbar()
-    
     X = np.fft.ifft2(A)
     X_real = X.real
     signal = np.array(np.exp(X_real))
@@ -83,9 +63,11 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     signal = signal/np.amax(signal)
     signal = signal**sigma
     
+    plt.figure()
+    plt.imshow(signal)
+    
     return signal
 
-'''
 
 ###############################################################################
     
@@ -209,11 +191,11 @@ def COM(X):
 '''Initialisation of variables'''
 ###############################################################################
     
-N=100
+N=100000
 Seed = 120
 
 ###############################################################################
 '''Implementing 2D Spectral Synthesis'''
 ###############################################################################
 
-i,j = SpectralSynthesis2D(N,0.6,5.0,Seed)
+X = SpectralSynthesis2D(N,0.6,5.0,Seed)
