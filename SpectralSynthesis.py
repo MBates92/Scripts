@@ -53,18 +53,17 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     firstsecond = np.concatenate((first,second), axis = 1)
     thirdfourth = np.concatenate((fourth,third), axis = 1)
     
-    A = np.concatenate((firstsecond, thirdfourth), axis = 0)               
+    A = np.concatenate((firstsecond, thirdfourth), axis = 0)             
 
     X = np.fft.ifft2(A)
-    X_real = X.real
-    signal = np.array(np.exp(X_real))
+    signal = X.real
+    signal = signal*sigma/np.std(np.abs(signal))
+    signal = np.exp(signal)
     signal = COM(signal)
-    signal = signal-np.amin(signal)
-    signal = signal/np.amax(signal)
-    signal = signal**sigma
     
     plt.figure()
     plt.imshow(signal)
+    plt.colorbar()
     
     return signal
 
@@ -191,11 +190,11 @@ def COM(X):
 '''Initialisation of variables'''
 ###############################################################################
     
-N=10000
+N=1000
 Seed = 120
 
 ###############################################################################
 '''Implementing 2D Spectral Synthesis'''
 ###############################################################################
 
-X = SpectralSynthesis2D(N,0.6,5.0,Seed)
+X = SpectralSynthesis2D(N,0.6,0.5,Seed)
