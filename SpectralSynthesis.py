@@ -98,6 +98,58 @@ def SpectralSynthesis3D(N,H,sigma,Seed=None):
     
     """
     
+    if Seed != None:
+        np.random.seed(int(Seed))  
+        
+    i, j, k = np.meshgrid(range(1,N+1),range(1,N+1),
+                       range(1,N+1))
+    shape = np.shape(i)
+    print(shape)
+    
+    phase = 2*np.pi*np.random.random((N,N,N))
+    rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal(size=(N,N,N))
+    
+    phaseneg = phase[[slice(None,None,-1)]*3]
+    phase = phase - phaseneg
+    
+    A = rad*np.cos(phase)+rad*np.sin(phase)*1j
+    
+    X = np.fft.ifftn(A)
+    signal = X.real
+    signal = signal*sigma/np.std(np.abs(signal))
+    signal = np.exp(signal)
+    signal = COM(signal)
+    
+    plt.figure()
+    plt.imshow(signal[-50,:,:])
+    plt.colorbar()
+    
+    return signal
+"""
+    phase = 2*np.pi*np.random.random((int(N/2),int(N/2),int(N/2)))
+    rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal(size=(int(N/2),
+                          int(N/2),int(N/2)))
+        
+    second = np.rot90(rad*np.cos(phase)+rad*np.sin(phase)*1j, k = 3)
+    fourth = np.rot90(rad*np.cos(phase)-rad*np.sin(phase)*1j, k = 1)
+    
+    firstsecond = np.concatenate((first,second), axis = 1)
+    thirdfourth = np.concatenate((fourth,third), axis = 1)
+    
+    A = np.concatenate((firstsecond, thirdfourth), axis = 0)             
+
+    X = np.fft.ifft2(A)
+    signal = X.real
+    signal = signal*sigma/np.std(np.abs(signal))
+    signal = np.exp(signal)
+    signal = COM(signal)
+    
+    plt.figure()
+    plt.imshow(signal)
+    plt.colorbar()
+    """
+
+'''
     A = np.zeros((N,N,N), dtype = np.complex)
     if Seed != None:
         np.random.seed(int(Seed))
@@ -160,7 +212,7 @@ def SpectralSynthesis3D(N,H,sigma,Seed=None):
     signal = signal**sigma
     
     return signal
-
+'''
 ###############################################################################
 
 def COM(X):
@@ -190,11 +242,11 @@ def COM(X):
 '''Initialisation of variables'''
 ###############################################################################
     
-N=1000
+N=100
 Seed = 120
 
 ###############################################################################
 '''Implementing 2D Spectral Synthesis'''
 ###############################################################################
 
-X = SpectralSynthesis2D(N,0.6,0.5,Seed)
+X = SpectralSynthesis3D(N,0.6,0.5,Seed)
