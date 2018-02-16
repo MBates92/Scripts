@@ -37,33 +37,40 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     if Seed != None:
         np.random.seed(int(Seed))  
         
-    i, j = np.meshgrid(range(1,int(N/2)+1),range(1,int(N/2)+1))
-    phase = 2*np.pi*np.random.random((int(N/2),int(N/2)))
-    rad = (i*i+j*j)**(-(H+1)/2)*np.random.normal(size=(int(N/2),int(N/2)))
+    i, j = np.meshgrid(range(-int(N/2),int(N/2)+1),range(-int(N/2),int(N/2)+1))
     
-    first = rad*np.cos(phase)+rad*np.sin(phase)*1j
-    third = np.rot90(rad*np.cos(phase)-rad*np.sin(phase)*1j, k = 2)
-    
-    phase = 2*np.pi*np.random.random((int(N/2),int(N/2)))
-    rad = (i*i+j*j)**(-(H+1)/2)*np.random.normal(size=(int(N/2),int(N/2)))
-        
-    second = np.rot90(rad*np.cos(phase)+rad*np.sin(phase)*1j, k = 3)
-    fourth = np.rot90(rad*np.cos(phase)-rad*np.sin(phase)*1j, k = 1)
-    
-    firstsecond = np.concatenate((first,second), axis = 1)
-    thirdfourth = np.concatenate((fourth,third), axis = 1)
-    
-    A = np.concatenate((firstsecond, thirdfourth), axis = 0)             
+    k = (i*i+j*j)**(0.5)
+    rad = np.where(k>0,k**(-(H+1)),0.0)
 
-    X = np.fft.ifft2(A)
-    signal = X.real
-    signal = signal*sigma/np.std(np.abs(signal))
+    phase = 2*np.pi*np.random.random((N+1,N+1))
+
+    phaseneg = phase[slice(None,None,-1),slice(None,None,-1)]
+    phase = phase - phaseneg
+
+    A = rad*np.cos(phase)+rad*np.sin(phase)*1j 
+       
+    A[0,:] = A[0,:] + A[-1,:]
+    A = np.delete(A,-1,0)
+    
+    A[:,0] = A[:,0] + A[:,-1]
+    A = np.delete(A,-1,1)  
+    
+    A = np.roll(A,int(N/2),axis = 0)
+    A = np.roll(A,int(N/2),axis = 1)
+    
+    a = np.arange(36).reshape(6,6)
+    shape = a.shape
+    print(shape[0])
+    print(a)
+    a = np.roll(a,int(shape[0]/2),axis = 0)
+    a = np.roll(a,int(shape[0]/2),axis = 1)
+    print(a)
+
+    signal = np.fft.ifft2(A)
+    signal = signal.real
+    signal *= sigma/np.std(np.abs(signal))
     signal = np.exp(signal)
     signal = COM(signal)
-    
-    plt.figure()
-    plt.imshow(signal)
-    plt.colorbar()
     
     return signal
 
@@ -119,100 +126,9 @@ def SpectralSynthesis3D(N,H,sigma,Seed=None):
     signal = signal*sigma/np.std(np.abs(signal))
     signal = np.exp(signal)
     signal = COM(signal)
-    
-    plt.figure()
-    plt.imshow(signal[-50,:,:])
-    plt.colorbar()
-    
-    return signal
-"""
-    phase = 2*np.pi*np.random.random((int(N/2),int(N/2),int(N/2)))
-    rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal(size=(int(N/2),
-                          int(N/2),int(N/2)))
         
-    second = np.rot90(rad*np.cos(phase)+rad*np.sin(phase)*1j, k = 3)
-    fourth = np.rot90(rad*np.cos(phase)-rad*np.sin(phase)*1j, k = 1)
-    
-    firstsecond = np.concatenate((first,second), axis = 1)
-    thirdfourth = np.concatenate((fourth,third), axis = 1)
-    
-    A = np.concatenate((firstsecond, thirdfourth), axis = 0)             
-
-    X = np.fft.ifft2(A)
-    signal = X.real
-    signal = signal*sigma/np.std(np.abs(signal))
-    signal = np.exp(signal)
-    signal = COM(signal)
-    
-    plt.figure()
-    plt.imshow(signal)
-    plt.colorbar()
-    """
-
-'''
-    A = np.zeros((N,N,N), dtype = np.complex)
-    if Seed != None:
-        np.random.seed(int(Seed))
-    for i in range(0,int(N/2)+1):
-        for j in range(0,int(N/2)+1):
-            for k in range(0,int(N/2)+1):
-
-                phase = 2*np.pi*np.random.random()
-
-                if ((i!=0) or (j!=0)) or (k!=0):
-                    rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal()
-                else:
-                    rad=0
-                A[i,j,k] = rad*np.cos(phase)+rad*np.sin(phase)*1j
-            
-                if i==0:
-                    i0 = 0
-                else:
-                    i0=N-i
-                if j==0:
-                    j0=0
-                else:
-                    j0=N-j
-                if k==0:
-                    k0=0
-                else:
-                    k0=N-k
-                       
-                A[i0,j0,k0]=rad*np.cos(phase)-rad*np.sin(phase)*1j
-                
-                print(str(H)+':'+str(sigma)+':'+str(i)+':'+str(j)+':'+str(k))
-    
-    for i in range(1,int(N/2)):
-        for j in range(1,int(N/2)):
-            for k in range(1,int(N/2)):
-                phase = 2*np.pi*np.random.random()
-                rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal()
-                A[i,N-j,k] = rad*np.cos(phase)+rad*np.sin(phase)*1j
-                A[N-i,j,N-k] = rad*np.cos(phase)-rad*np.sin(phase)*1j
-                
-                phase = 2*np.pi*np.random.random()
-                rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal()
-                A[N-i,N-j,k] = rad*np.cos(phase)+rad*np.sin(phase)*1j
-                A[i,j,N-k] = rad*np.cos(phase)-rad*np.sin(phase)*1j
-                
-                phase = 2*np.pi*np.random.random()
-                rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal()
-                A[N-i,j,k] = rad*np.cos(phase)+rad*np.sin(phase)*1j
-                A[i,N-j,N-k] = rad*np.cos(phase)-rad*np.sin(phase)*1j
-                
-                print(str(H)+':'+str(sigma)+':'+str(i)+':'+str(j)+':'+str(k))
-            
-    
-    X = np.fft.ifftn(A)
-    X_real = X.real
-    signal = np.array(np.exp(X_real))
-    signal = COM(signal)
-    signal = signal-np.amin(signal)
-    signal = signal/np.amax(signal)
-    signal = signal**sigma
-    
     return signal
-'''
+
 ###############################################################################
 
 def COM(X):
@@ -239,14 +155,87 @@ def COM(X):
     return X
 
 ###############################################################################
-'''Initialisation of variables'''
+'''Initialisation'''
 ###############################################################################
     
-N=100
+N=1000
 Seed = 120
 
+sample_H = np.linspace(0.0,1.0,100)
+sample_sigma = np.linspace(0.0,2.0,100)
+
+np.save('../SpectralSynthesis/2DSignal/H_sample',sample_H)
+np.save('../SpectralSynthesis/2DSignal/sigma_sample',sample_sigma)
+
 ###############################################################################
-'''Implementing 2D Spectral Synthesis'''
+'''Implementing'''
 ###############################################################################
 
-X = SpectralSynthesis3D(N,0.6,0.5,Seed)
+X = SpectralSynthesis2D(N,1.0,0.1,Seed)
+
+plt.figure()
+plt.imshow(X)
+
+'''
+X = SpectralSynthesis2D(N,0.0,0.1,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('0.0,0.1')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,0.5,0.1,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('0.5,0.1')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,1.0,0.1,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('1.0,0.1')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,0.0,1.0,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('0.0,1.0')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,0.5,1.0,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('0.5,1.0')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,1.0,1.0,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('1.0,1.0')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,0.0,2.0,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('0.0,2.0')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,0.5,2.0,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('0.5,2.0')
+plt.colorbar()
+
+X = SpectralSynthesis2D(N,1.0,2.0,Seed)
+plt.figure()
+plt.imshow(X)
+plt.title('1.0,2.0')
+plt.colorbar()
+'''
+
+'''
+for i in range(0,len(sample_H)):
+    for j in range(0,len(sample_sigma)):
+        X = SpectralSynthesis2D(N,sample_H[i],sample_sigma[j])
+        np.save('../SpectralSynthesis/2DSignal/X_'+str(i)+'_'+str(j),X)
+        
+        '''
