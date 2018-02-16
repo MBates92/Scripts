@@ -58,14 +58,6 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     A = np.roll(A,int(N/2),axis = 0)
     A = np.roll(A,int(N/2),axis = 1)
     
-    a = np.arange(36).reshape(6,6)
-    shape = a.shape
-    print(shape[0])
-    print(a)
-    a = np.roll(a,int(shape[0]/2),axis = 0)
-    a = np.roll(a,int(shape[0]/2),axis = 1)
-    print(a)
-
     signal = np.fft.ifft2(A)
     signal = signal.real
     signal *= sigma/np.std(np.abs(signal))
