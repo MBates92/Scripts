@@ -40,7 +40,7 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     i, j = np.meshgrid(range(-int(N/2),int(N/2)+1),range(-int(N/2),int(N/2)+1))
     
     k = (i*i+j*j)**(0.5)
-    rad = np.where(k>0,k**(-(H+1)),0.0)
+    rad = np.where(k>0.0,k**(-(H+1)),0.0)
 
     phase = 2*np.pi*np.random.random((N+1,N+1))
 
@@ -156,78 +156,15 @@ Seed = 120
 sample_H = np.linspace(0.0,1.0,100)
 sample_sigma = np.linspace(0.0,2.0,100)
 
-np.save('../SpectralSynthesis/2DSignal/H_sample',sample_H)
-np.save('../SpectralSynthesis/2DSignal/sigma_sample',sample_sigma)
+np.save('../SpectralSynthesis/2D/target/H_sample',sample_H)
+np.save('../SpectralSynthesis/2D/target/sigma_sample',sample_sigma)
 
 ###############################################################################
 '''Implementing'''
 ###############################################################################
 
-X = SpectralSynthesis2D(N,1.0,0.1,Seed)
-
-plt.figure()
-plt.imshow(X)
-
-'''
-X = SpectralSynthesis2D(N,0.0,0.1,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('0.0,0.1')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,0.5,0.1,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('0.5,0.1')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,1.0,0.1,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('1.0,0.1')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,0.0,1.0,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('0.0,1.0')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,0.5,1.0,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('0.5,1.0')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,1.0,1.0,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('1.0,1.0')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,0.0,2.0,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('0.0,2.0')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,0.5,2.0,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('0.5,2.0')
-plt.colorbar()
-
-X = SpectralSynthesis2D(N,1.0,2.0,Seed)
-plt.figure()
-plt.imshow(X)
-plt.title('1.0,2.0')
-plt.colorbar()
-'''
-
-'''
 for i in range(0,len(sample_H)):
+    print(i)
     for j in range(0,len(sample_sigma)):
         X = SpectralSynthesis2D(N,sample_H[i],sample_sigma[j])
-        np.save('../SpectralSynthesis/2DSignal/X_'+str(i)+'_'+str(j),X)
-        
-        '''
+        np.save('../SpectralSynthesis/2D/Signal/X_'+str(i)+'_'+str(j),X)

@@ -8,6 +8,16 @@ from scipy.sparse.csgraph import minimum_spanning_tree
 '''Functions'''
 ###############################################################################
 
+def raw_mom(x,n):
+    return np.sum(x**n)/len(x)
+
+###############################################################################
+
+def central_mom(x,n):
+    return np.sum((x-np.mean(x)**n))/len(x)
+
+###############################################################################
+
 def MeanEdgeLength(points):
     
     xcoord,ycoord = MinSpanTree(points)
@@ -27,8 +37,6 @@ def MeanEdgeLength(points):
     m_bar = meanEdgeLength*(N_total - 1)/np.sqrt((N_total*A))
     
     return m_bar
-    
-###############################################################################
     
 ###############################################################################
 
@@ -99,79 +107,3 @@ def MinSpanTree(points):
 '''Input data'''
 ###############################################################################
 
-points1 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H00_Sigma01.txt')
-points1 = np.delete(points1,2,1)
-points2 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H05_Sigma01.txt')
-points2 = np.delete(points2,2,1)
-points3 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H10_Sigma01.txt')
-points3 = np.delete(points3,2,1)
-
-points4 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H00_Sigma05.txt')
-points4 = np.delete(points4,2,1)
-points5 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H05_Sigma05.txt')
-points5 = np.delete(points5,2,1)
-points6 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H10_Sigma05.txt')
-points6 = np.delete(points6,2,1)
-
-points7 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H00_Sigma10.txt')
-points7 = np.delete(points7,2,1)
-points8 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H05_Sigma10.txt')
-points8 = np.delete(points8,2,1)
-points9 = np.loadtxt('SpectralSynthesis/3DVariates/Variates_H10_Sigma10.txt')
-points9 = np.delete(points9,2,1)
-
-###############################################################################
-'''Implementing MST'''
-###############################################################################
-
-x_coords1, y_coords1 = MinSpanTree(points1)
-x_coords2, y_coords2 = MinSpanTree(points2)
-x_coords3, y_coords3 = MinSpanTree(points3)
-
-x_coords4, y_coords4 = MinSpanTree(points4)
-x_coords5, y_coords5 = MinSpanTree(points5)
-x_coords6, y_coords6 = MinSpanTree(points6)
-
-x_coords7, y_coords7 = MinSpanTree(points7)
-x_coords8, y_coords8 = MinSpanTree(points8)
-x_coords9, y_coords9 = MinSpanTree(points9)
-
-###############################################################################
-'''Plotting MST'''
-###############################################################################
-'''
-f, axarr = plt.subplots(3,3,figsize=(1920/144, 1080/144), dpi=144,
-                        sharex=True, sharey=True)
-
-axarr[0,0].plot(x_coords1, y_coords1, c='r', lw = 0.5)
-axarr[0,0].scatter(points1[:,0],points1[:,1], c='k', s = 0.5)
-axarr[0,0].set_title(r'$H=0.0,\sigma = 1.0$')
-axarr[1,0].plot(x_coords2, y_coords2, c='r',lw = 0.5)
-axarr[1,0].scatter(points2[:,0],points2[:,1], c='k', s = 0.5)
-axarr[1,0].set_title(r'$H=0.5,\sigma = 1.0$')
-axarr[2,0].plot(x_coords3, y_coords3, c='r',lw = 0.5)
-axarr[2,0].scatter(points3[:,0],points3[:,1], c='k', s = 0.5)
-axarr[2,0].set_title(r'$H=1.0,\sigma = 1.0$')
-
-axarr[0,1].plot(x_coords4, y_coords4, c='r',lw = 0.5)
-axarr[0,1].scatter(points4[:,0],points4[:,1], c='k', s = 0.5)
-axarr[0,1].set_title(r'$H=0.0,\sigma = 5.0$')
-axarr[1,1].plot(x_coords5, y_coords5, c='r',lw = 0.5)
-axarr[1,1].scatter(points5[:,0],points5[:,1], c='k', s = 0.5)
-axarr[1,1].set_title(r'$H=0.5,\sigma = 5.0$')
-axarr[2,1].plot(x_coords6, y_coords6, c='r',lw = 0.5)
-axarr[2,1].scatter(points6[:,0],points6[:,1], c='k', s = 0.5)
-axarr[2,1].set_title(r'$H=1.0,\sigma = 5.0$')
-
-axarr[0,2].plot(x_coords7, y_coords7, c='r',lw = 0.5)
-axarr[0,2].scatter(points7[:,0],points7[:,1], c='k', s = 0.5)
-axarr[0,2].set_title(r'$H=0.0,\sigma = 10.0$')
-axarr[1,2].plot(x_coords8, y_coords8, c='r',lw = 0.5)
-axarr[1,2].scatter(points8[:,0],points8[:,1], c='k', s = 0.5)
-axarr[1,2].set_title(r'$H=0.5,\sigma = 10.0$')
-axarr[2,2].plot(x_coords9, y_coords9, c='r',lw = 0.5)
-axarr[2,2].scatter(points9[:,0],points9[:,1], c='k', s = 0.5)
-axarr[2,2].set_title(r'$H=1.0,\sigma = 10.0$')
-plt.tight_layout()
-plt.savefig('SpectralSynthesis/MST.png')
-'''

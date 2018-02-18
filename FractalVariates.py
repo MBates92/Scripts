@@ -1,16 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+import os
 from scipy import stats
 
 ###############################################################################
 '''Functions'''
 ###############################################################################
 
-def variates(signal, population, noise = True, noise_std = 0.5):
+def variates(signal, population, noise = True, noise_std = 0.5, convert=False):
     
     """
-    Function that takes a 2D signal, converts to PDF,
+    Function that takes a signal, converts to PDF,
     samples random variates, adds Gaussian noise w. st.dev = 0.5
     
     ===Arguments===
@@ -105,151 +105,43 @@ def variates(signal, population, noise = True, noise_std = 0.5):
                 points[i,0] += np.random.normal(0,noise_std)
                 points[i,1] += np.random.normal(0,noise_std)
                 points[i,2] += np.random.normal(0,noise_std)
+                
+        #project 3D points onto 2D plane        
+        if convert == True:
+            np.delete(points,2,1)
     return points
 
 ###############################################################################
-'''Initialisation of variables'''
+'''Initialisation'''
 ###############################################################################
 
 N=300 #number of stars
 
 ###############################################################################
-'''Input 2D signal data'''
-###############################################################################
-'''
-signal1 = np.loadtxt('SpectralSynthesis/2DSignal/X1.txt')
-signal2 = np.loadtxt('SpectralSynthesis/2DSignal/X2.txt')
-signal3 = np.loadtxt('SpectralSynthesis/2DSignal/X3.txt')
-
-signal4 = np.loadtxt('SpectralSynthesis/2DSignal/X4.txt')
-signal5 = np.loadtxt('SpectralSynthesis/2DSignal/X5.txt')
-signal6 = np.loadtxt('SpectralSynthesis/2DSignal/X6.txt')
-
-signal7 = np.loadtxt('SpectralSynthesis/2DSignal/X7.txt')
-signal8 = np.loadtxt('SpectralSynthesis/2DSignal/X8.txt')
-signal9 = np.loadtxt('SpectralSynthesis/2DSignal/X9.txt')
-'''
-###############################################################################
-'''Input signal data'''
+'''Implementation'''
 ###############################################################################
 
-signal1 = np.load('SpectralSynthesis/3DSignal/X_H00_Sigma01.npy')
-signal2 = np.load('SpectralSynthesis/3DSignal/X_H05_Sigma01.npy')
-signal3 = np.load('SpectralSynthesis/3DSignal/X_H10_Sigma01.npy')
+file_dir = '../SpectralSynthesis/2D/Signal/'
+file_list = os.listdir(file_dir)
 
-signal4 = np.load('SpectralSynthesis/3DSignal/X_H00_Sigma05.npy')
-signal5 = np.load('SpectralSynthesis/3DSignal/X_H05_Sigma05.npy')
-signal6 = np.load('SpectralSynthesis/3DSignal/X_H10_Sigma05.npy')
+H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
+sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
 
-signal7 = np.load('SpectralSynthesis/3DSignal/X_H00_Sigma10.npy')
-signal8 = np.load('SpectralSynthesis/3DSignal/X_H05_Sigma10.npy')
-signal9 = np.load('SpectralSynthesis/3DSignal/X_H10_Sigma10.npy')
+sigma_targets, H_targets  = np.meshgrid(sigma_targets,H_targets)
+H_targets = H_targets.flatten()
+sigma_targets = sigma_targets.flatten()
 
-###############################################################################
-'''Variate sampling from signal data using variates function'''
-###############################################################################
+plt.ioff()
 
-points1 = variates(signal1,N)
-points2 = variates(signal2,N)
-points3 = variates(signal3,N)
-
-points4 = variates(signal4,N)
-points5 = variates(signal5,N)
-points6 = variates(signal6,N)
-
-points7 = variates(signal7,N)
-points8 = variates(signal8,N)
-points9 = variates(signal9,N)
-
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H00_Sigma01.txt',points1)
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H05_Sigma01.txt',points2)
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H10_Sigma01.txt',points3)
-
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H00_Sigma05.txt',points4)
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H05_Sigma05.txt',points5)
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H10_Sigma05.txt',points6)
-
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H00_Sigma10.txt',points7)
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H05_Sigma10.txt',points8)
-np.savetxt('SpectralSynthesis/3DVariates/Variates_H10_Sigma10.txt',points9)
-
-###############################################################################
-'''Plotting 2D variates'''
-###############################################################################
-'''
-f, axarr = plt.subplots(3,3,figsize=(1920/144, 1080/144), dpi=144,
-                        sharex=True, sharey=True)
-
-axarr[0,0].plot(points1[:,0],points1[:,1], 'b+')
-axarr[0,0].set_title(r'$H=0.0,\sigma = 1.0$')
-axarr[1,0].plot(points2[:,0],points2[:,1], 'b+')
-axarr[1,0].set_title(r'$H=0.5,\sigma = 1.0$')
-axarr[2,0].plot(points3[:,0],points3[:,1], 'b+')
-axarr[2,0].set_title(r'$H=1.0,\sigma = 1.0$')
-
-axarr[0,1].plot(points4[:,0],points4[:,1], 'b+')
-axarr[0,1].set_title(r'$H=0.0,\sigma = 5.0$')
-axarr[1,1].plot(points5[:,0],points5[:,1], 'b+')
-axarr[1,1].set_title(r'$H=0.5,\sigma = 5.0$')
-axarr[2,1].plot(points6[:,0],points6[:,1], 'b+')
-axarr[2,1].set_title(r'$H=1.0,\sigma = 5.0$')
-
-axarr[0,2].plot(points7[:,0],points7[:,1], 'b+')
-axarr[0,2].set_title(r'$H=0.0,\sigma = 10.0$')
-axarr[1,2].plot(points8[:,0],points8[:,1], 'b+')
-axarr[1,2].set_title(r'$H=0.5,\sigma = 10.0$')
-axarr[2,2].plot(points9[:,0],points9[:,1], 'b+')
-axarr[2,2].set_title(r'$H=1.0,\sigma = 10.0$')
-plt.tight_layout()
-plt.savefig('SpectralSynthesis/2DVariates.png')
-'''
-###############################################################################
-'''Plotting 3D variates'''
-###############################################################################
-'''
-for i,j in [(points1,r'$H=0.0,\sigma = 1.0$'),
-            (points2,r'$H=0.5,\sigma = 1.0$'),
-            (points3,r'$H=1.0,\sigma = 1.0$'),
-            (points4,r'$H=0.0,\sigma = 5.0$'),
-            (points5,r'$H=0.5,\sigma = 5.0$'),
-            (points6,r'$H=1.0,\sigma = 5.0$'),
-            (points7,r'$H=0.0,\sigma = 10.0$'),
-            (points8,r'$H=0.5,\sigma = 10.0$'),
-            (points9,r'$H=1.0,\sigma = 10.0$')]:
+for i in range(len(file_list)):
+    field = np.load(file_dir+file_list[i])
+    stars = variates(field,N)
+    name = file_list[i]
+    name = name[:-4]
+    np.save('../SpectralSynthesis/2D/Variates/'+file_list[i],stars)
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(i[:,0], i[:,1], i[:,2], c='b', marker='+')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title(j)
-    '''
-###############################################################################
-'''Plotting 2D projected 3D variates'''
-###############################################################################
+    plt.scatter(stars[:,0],stars[:,1],c='k',s=3.0)
+    plt.title(r'$H = '+str(H_targets[i])+',\sigma = '+str(sigma_targets[i])+'$')
+    plt.savefig('../SpectralSynthesis/2D/VariateImages/'+name)
+    plt.close(fig)
 
-f, axarr = plt.subplots(3,3,figsize=(1920/144, 1080/144), dpi=144,
-                        sharex=True, sharey=True)
-
-axarr[0,0].plot(points1[:,0],points1[:,1], 'b+')
-axarr[0,0].set_title(r'$H=0.0,\sigma = 1.0$')
-axarr[1,0].plot(points2[:,0],points2[:,1], 'b+')
-axarr[1,0].set_title(r'$H=0.5,\sigma = 1.0$')
-axarr[2,0].plot(points3[:,0],points3[:,1], 'b+')
-axarr[2,0].set_title(r'$H=1.0,\sigma = 1.0$')
-
-axarr[0,1].plot(points4[:,0],points4[:,1], 'b+')
-axarr[0,1].set_title(r'$H=0.0,\sigma = 5.0$')
-axarr[1,1].plot(points5[:,0],points5[:,1], 'b+')
-axarr[1,1].set_title(r'$H=0.5,\sigma = 5.0$')
-axarr[2,1].plot(points6[:,0],points6[:,1], 'b+')
-axarr[2,1].set_title(r'$H=1.0,\sigma = 5.0$')
-
-axarr[0,2].plot(points7[:,0],points7[:,1], 'b+')
-axarr[0,2].set_title(r'$H=0.0,\sigma = 10.0$')
-axarr[1,2].plot(points8[:,0],points8[:,1], 'b+')
-axarr[1,2].set_title(r'$H=0.5,\sigma = 10.0$')
-axarr[2,2].plot(points9[:,0],points9[:,1], 'b+')
-axarr[2,2].set_title(r'$H=1.0,\sigma = 10.0$')
-plt.tight_layout()
-plt.savefig('SpectralSynthesis/Projected3DVariates.png')
