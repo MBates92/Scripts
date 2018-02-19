@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.tri as tri
 from scipy.spatial import Delaunay
 from scipy.spatial import ConvexHull
 from scipy.sparse.csgraph import minimum_spanning_tree
+from itertools import combinations
 
 ###############################################################################
 '''Functions'''
@@ -14,7 +16,7 @@ def raw_mom(x,n):
 ###############################################################################
 
 def central_mom(x,n):
-    return np.sum((x-np.mean(x)**n))/len(x)
+    return np.sum((x-np.mean(x))**n)*(1/len(x))
 
 ###############################################################################
 
@@ -107,3 +109,63 @@ def MinSpanTree(points):
 '''Input data'''
 ###############################################################################
 
+stars = np.load('../SpectralSynthesis/2D/Variates/X_62_99.npy')
+
+x_coords, y_coords = MinSpanTree(stars)
+
+MST_edges = np.sqrt((x_coords[0,:]-x_coords[1,:])**2+
+                    (y_coords[0,:]-y_coords[1,:])**2)
+
+Del_tri = tri.Triangulation(stars[:,0],stars[:,1])
+Del_edges = Del_tri.edges
+Del_edges = stars[Del_edges]
+
+Del_x = Del_edges[:,:,0].T
+Del_y = Del_edges[:,:,1].T
+
+Del_edges = np.sqrt((Del_x[0,:]-Del_x[1,:])**2+
+                    (Del_y[0,:]-Del_y[1,:])**2)
+
+complete_edges = np.asarray(list((s[1],t[1]) for s,t in 
+                        combinations(enumerate(stars),2)))
+
+complete_x = complete_edges[:,0,:].T
+complete_y = complete_edges[:,1,:].T
+
+inj_x = np.copy(complete_x[1,:])
+inj_y = np.copy(complete_y[0,:])
+
+complete_x[1,:] = inj_y
+complete_y[0,:] = inj_x
+
+complete_edges = np.sqrt((complete_x[0,:]-complete_x[1,:])**2+
+                         (complete_y[0,:]-complete_y[1,:])**2)
+
+plt.figure()
+plt.plot(complete_x,complete_y,c='r',lw=0.5)
+plt.scatter(stars[:,0], stars[:,1], c= 'k', s = 2.0)
+plt.show()
+
+plt.figure()
+plt.plot(Del_x,Del_y,c='r',lw=0.5)
+plt.scatter(stars[:,0], stars[:,1], c= 'k', s = 2.0)
+plt.show()
+
+plt.figure()
+plt.plot(x_coords,y_coords, c= 'r', lw = 0.5)
+plt.scatter(stars[:,0], stars[:,1], c= 'k', s = 2.0)
+plt.show()
+
+MST_raw_moments = np.zeros(5)
+MST_central_moments = np.zeros(5)
+
+Del_raw_moments = np.zeros(5)
+Del_central_moments = np.zeros(5)
+
+for n in range(0,5):
+    MST_raw_moments[n] = raw_mom(MST_edges,n)
+    MST_central_moments[n] = central_mom(MST_edges,n)
+    
+    Del_raw_moments[n] = raw_mom(Del_edges,n)
+    Del_central_moments[n] = central_mom(Del_edges,n)
+    
