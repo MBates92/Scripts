@@ -179,86 +179,110 @@ def MinSpanTree(points):
     y_coords = np.vstack([A[1], B[1]])
     
     return x_coords, y_coords
+
+###############################################################################
     
+def features(points):
+    
+    """
+    Function that takes a set of points and calculates features (first five
+    central and raw moments, the max, min, and mean) of the complete graph,
+    the Delaunay Triangulation, and Minimum Spanning Tree.
+    
+    ===Arguments===
+    
+    -points: float
+        2D array of points of size (N,2) containing x and y coordinates of
+        N points
+        
+    ===Returns===
+    
+    -features: float
+        1D array containing a number of features calculated from the complete 
+        graph, Delaunay Triangulation, and the Minimum Spanning Tree
+    
+    """
+    
+    feature_list = ['Complete: Zeroth Central Moment',
+                    'Complete: First Central Moment',
+                    'Complete: Second Central Moment',
+                    'Complete: Third Central Moment',
+                    'Complete: Fourth Central Moment',
+                    'Complete: Zeroth Raw Moment',
+                    'Complete: First Raw Moment',
+                    'Complete: Second Raw Moment',
+                    'Complete: Third Raw Moment',
+                    'Complete: Fourth Raw Moment',
+                    'Complete: Max Edge Length',
+                    'Complete: Min Edge Length',
+                    'Complete: Mean Edge Length',
+                    'Delaunay: Zeroth Central Moment',
+                    'Delaunay: First Central Moment',
+                    'Delaunay: Second Central Moment',
+                    'Delaunay: Third Central Moment',
+                    'Delaunay: Fourth Central Moment',
+                    'Delaunay: Zeroth Raw Moment',
+                    'Delaunay: First Raw Moment',
+                    'Delaunay: Second Raw Moment',
+                    'Delaunay: Third Raw Moment',
+                    'Delaunay: Fourth Raw Moment',
+                    'Delaunay: Max Edge Length',
+                    'Delaunay: Min Edge Length',
+                    'Delaunay: Mean Edge Length',
+                    'MST: Zeroth Central Moment',
+                    'MST: First Central Moment',
+                    'MST: Second Central Moment',
+                    'MST: Third Central Moment',
+                    'MST: Fourth Central Moment',
+                    'MST: Zeroth Raw Moment',
+                    'MST: First Raw Moment',
+                    'MST: Second Raw Moment',
+                    'MST: Third Raw Moment',
+                    'MST: Fourth Raw Moment',
+                    'MST: Max Edge Length',
+                    'MST: Min Edge Length',
+                    'MST: Mean Edge Length']
+    
+    features = np.zeros(len(feature_list))
+    
+    MST_x, MST_y = MinSpanTree(points)
+    MST_edges = np.sqrt((MST_x[0,:]-MST_x[1,:])**2+
+                        (MST_y[0,:]-MST_y[1,:])**2)
+    
+    Del_x, Del_y = DelaunayTriangulation(points)
+    Del_edges = np.sqrt((Del_x[0,:]-Del_x[1,:])**2+
+                        (Del_y[0,:]-Del_y[1,:])**2)
+    
+    complete_x, complete_y = completeGraph(points)
+    complete_edges = np.sqrt((complete_x[0,:]-complete_x[1,:])**2+
+                             (complete_y[0,:]-complete_y[1,:])**2) 
+    
+    for n in range(0,5):
+        features[n] = central_mom(complete_edges,n)
+        features[n+5] = raw_mom(complete_edges,n)   
+    
+        features[n+13] = central_mom(Del_edges,n)    
+        features[n+18] = raw_mom(Del_edges,n)
+        
+        features[n+26] = central_mom(MST_edges,n)
+        features[n+31] = raw_mom(MST_edges,n)
+        
+    features[10] = np.max(complete_edges)
+    features[11] = np.min(complete_edges)
+    features[12] = np.mean(complete_edges)
+    features[23] = np.max(Del_edges)
+    features[24] = np.min(Del_edges)
+    features[25] = np.mean(Del_edges)
+    features[36] = np.max(MST_edges)
+    features[37] = np.min(MST_edges)
+    features[38] = np.mean(MST_edges)
+    
+    return features
+
 ###############################################################################
 '''Input data'''
 ###############################################################################
-
-feature_list = ['Complete: Zeroth Central Moment',
-                'Complete: First Central Moment',
-                'Complete: Second Central Moment',
-                'Complete: Third Central Moment',
-                'Complete: Fourth Central Moment',
-                'Complete: Zeroth Raw Moment',
-                'Complete: First Raw Moment',
-                'Complete: Second Raw Moment',
-                'Complete: Third Raw Moment',
-                'Complete: Fourth Raw Moment',
-                'Complete: Max Edge Length',
-                'Complete: Min Edge Length',
-                'Complete: Mean Edge Length',
-                'Delaunay: Zeroth Central Moment',
-                'Delaunay: First Central Moment',
-                'Delaunay: Second Central Moment',
-                'Delaunay: Third Central Moment',
-                'Delaunay: Fourth Central Moment',
-                'Delaunay: Zeroth Raw Moment',
-                'Delaunay: First Raw Moment',
-                'Delaunay: Second Raw Moment',
-                'Delaunay: Third Raw Moment',
-                'Delaunay: Fourth Raw Moment',
-                'Delaunay: Max Edge Length',
-                'Delaunay: Min Edge Length',
-                'Delaunay: Mean Edge Length',
-                'MST: Zeroth Central Moment',
-                'MST: First Central Moment',
-                'MST: Second Central Moment',
-                'MST: Third Central Moment',
-                'MST: Fourth Central Moment',
-                'MST: Zeroth Raw Moment',
-                'MST: First Raw Moment',
-                'MST: Second Raw Moment',
-                'MST: Third Raw Moment',
-                'MST: Fourth Raw Moment',
-                'MST: Max Edge Length',
-                'MST: Min Edge Length',
-                'MST: Mean Edge Length']
-
-features = np.zeros(len(feature_list))
-
-stars = np.load('../SpectralSynthesis/2D/Variates/X_62_99.npy')
-
-MST_x, MST_y = MinSpanTree(stars)
-
-MST_edges = np.sqrt((MST_x[0,:]-MST_x[1,:])**2+
-                    (MST_y[0,:]-MST_y[1,:])**2)
-
-Del_x, Del_y = DelaunayTriangulation(stars)
-
-Del_edges = np.sqrt((Del_x[0,:]-Del_x[1,:])**2+
-                    (Del_y[0,:]-Del_y[1,:])**2)
-
-complete_x, complete_y = completeGraph(stars)
-
-complete_edges = np.sqrt((complete_x[0,:]-complete_x[1,:])**2+
-                         (complete_y[0,:]-complete_y[1,:])**2)
-
-for n in range(0,5):
-    features[n] = central_mom(complete_edges,n)
-    features[n+5] = raw_mom(complete_edges,n)   
-
-    features[n+13] = central_mom(Del_edges,n)    
-    features[n+18] = raw_mom(Del_edges,n)
     
-    features[n+26] = central_mom(MST_edges,n)
-    features[n+31] = raw_mom(MST_edges,n)
-    
-features[10] = np.max(complete_edges)
-features[11] = np.min(complete_edges)
-features[12] = np.mean(complete_edges)
-features[23] = np.max(Del_edges)
-features[24] = np.min(Del_edges)
-features[25] = np.mean(Del_edges)
-features[36] = np.max(MST_edges)
-features[37] = np.min(MST_edges)
-features[38] = np.mean(MST_edges)
+###############################################################################
+'''Implementation'''
+###############################################################################
