@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+import os
 from scipy.spatial import Delaunay
 from scipy.spatial import ConvexHull
 from scipy.sparse.csgraph import minimum_spanning_tree
@@ -161,20 +162,19 @@ def MinSpanTree(points):
                   0]-points[edge_3[1],0])**2+(points[edge_3[0],
                            1]-points[edge_3[1],1])**2)
     
-    	print(length_simplices - i)
         
-    print('Producing MST')
+    #'Producing MST
     Tcsr = minimum_spanning_tree(graph_matrix)
     Tcsr = Tcsr.tocoo()
     
     p1 = Tcsr.row
     p2 = Tcsr.col
     
-    print('Linking data to MST')
+    #Linking data to MST
     A = points[p1].T
     B = points[p2].T
     
-    print('Producing coordinate system')
+    #Producing coordinate system
     x_coords = np.vstack([A[0], B[0]])
     y_coords = np.vstack([A[1], B[1]])
     
@@ -280,9 +280,35 @@ def features(points):
     return features
 
 ###############################################################################
-'''Input data'''
+'''Input and Initialisation'''
 ###############################################################################
-    
+
+file_dir = '../SpectralSynthesis/2D/Variates/'
+file_list = os.listdir(file_dir)
+
+H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
+sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
+
+sigma_targets, H_targets  = np.meshgrid(sigma_targets,H_targets)
+H_targets = H_targets.flatten()
+sigma_targets = sigma_targets.flatten()
+
+X = []
+y=[]
+
 ###############################################################################
 '''Implementation'''
 ###############################################################################
+
+for i in range(len(file_list)):
+    stars = np.load(file_dir+file_list[i])
+    X_i = features(stars)
+    X.append(X_i)
+    print(i)
+
+X = np.asarray(X)
+y.append(H_targets)
+y.append(sigma_targets)
+y=np.asarray(y)
+np.save('../SpectralSynthesis/2D/features',X)
+np.save('../SpectralSynthesis/2D/targets',y)

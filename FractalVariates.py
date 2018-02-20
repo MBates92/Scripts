@@ -144,4 +144,3 @@ for i in range(len(file_list)):
     plt.title(r'$H = '+str(H_targets[i])+',\sigma = '+str(sigma_targets[i])+'$')
     plt.savefig('../SpectralSynthesis/2D/VariateImages/'+name)
     plt.close(fig)
-

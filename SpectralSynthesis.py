@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -153,8 +154,8 @@ def COM(X):
 N=1000
 Seed = 120
 
-sample_H = np.linspace(0.0,1.0,100)
-sample_sigma = np.linspace(0.0,2.0,100)
+sample_H = np.random.random(100)
+sample_sigma = np.random.random(100)*2
 
 np.save('../SpectralSynthesis/2D/target/H_sample',sample_H)
 np.save('../SpectralSynthesis/2D/target/sigma_sample',sample_sigma)
