@@ -11,6 +11,13 @@ from itertools import combinations
 '''Functions'''
 ###############################################################################
 
+def nth_root(x,n):
+    y = np.absolute(x)**(1/n)
+    y *= np.sign(x)**n
+    return y
+
+###############################################################################
+
 def raw_mom(x,n):
     return np.sum(x**n)/len(x)
 
@@ -18,6 +25,13 @@ def raw_mom(x,n):
 
 def central_mom(x,n):
     return np.sum((x-np.mean(x))**n)*(1/len(x))
+
+###############################################################################
+    
+def normalised_mom(x,n):
+    nominator = central_mom(x,n)
+    denominator = nth_root(central_mom(x,n),2)**n
+    return nominator/denominator
 
 ###############################################################################
 
@@ -185,9 +199,8 @@ def MinSpanTree(points):
 def features(points):
     
     """
-    Function that takes a set of points and calculates features (first five
-    central and raw moments, the max, min, and mean) of the complete graph,
-    the Delaunay Triangulation, and Minimum Spanning Tree.
+    Function that takes a set of points and calculates features of the complete
+    graph, the Delaunay Triangulation, and Minimum Spanning Tree.
     
     ===Arguments===
     
@@ -203,45 +216,24 @@ def features(points):
     
     """
     
-    feature_list = ['Complete: Zeroth Central Moment',
-                    'Complete: First Central Moment',
-                    'Complete: Second Central Moment',
-                    'Complete: Third Central Moment',
-                    'Complete: Fourth Central Moment',
-                    'Complete: Zeroth Raw Moment',
-                    'Complete: First Raw Moment',
-                    'Complete: Second Raw Moment',
-                    'Complete: Third Raw Moment',
-                    'Complete: Fourth Raw Moment',
+    feature_list = ['Complete: Mean',
+                    'Complete: Variance',
+                    'Complete: Skewness',
+                    'Complete: Kurtosis',
                     'Complete: Max Edge Length',
                     'Complete: Min Edge Length',
-                    'Complete: Mean Edge Length',
-                    'Delaunay: Zeroth Central Moment',
-                    'Delaunay: First Central Moment',
-                    'Delaunay: Second Central Moment',
-                    'Delaunay: Third Central Moment',
-                    'Delaunay: Fourth Central Moment',
-                    'Delaunay: Zeroth Raw Moment',
-                    'Delaunay: First Raw Moment',
-                    'Delaunay: Second Raw Moment',
-                    'Delaunay: Third Raw Moment',
-                    'Delaunay: Fourth Raw Moment',
+                    'Delaunay: Mean',
+                    'Delaunay: Variance',
+                    'Delaunay: Skewness',
+                    'Delaunay: Kurtosis',
                     'Delaunay: Max Edge Length',
                     'Delaunay: Min Edge Length',
-                    'Delaunay: Mean Edge Length',
-                    'MST: Zeroth Central Moment',
-                    'MST: First Central Moment',
-                    'MST: Second Central Moment',
-                    'MST: Third Central Moment',
-                    'MST: Fourth Central Moment',
-                    'MST: Zeroth Raw Moment',
-                    'MST: First Raw Moment',
-                    'MST: Second Raw Moment',
-                    'MST: Third Raw Moment',
-                    'MST: Fourth Raw Moment',
+                    'MST: Mean',
+                    'MST: Variance',
+                    'MST: Skewness',
+                    'MST: Kurtosis',
                     'MST: Max Edge Length',
-                    'MST: Min Edge Length',
-                    'MST: Mean Edge Length']
+                    'MST: Min Edge Length']
     
     features = np.zeros(len(feature_list))
     
@@ -255,27 +247,32 @@ def features(points):
     
     complete_x, complete_y = completeGraph(points)
     complete_edges = np.sqrt((complete_x[0,:]-complete_x[1,:])**2+
-                             (complete_y[0,:]-complete_y[1,:])**2) 
+                             (complete_y[0,:]-complete_y[1,:])**2)
     
-    for n in range(0,5):
-        features[n] = central_mom(complete_edges,n)
-        features[n+5] = raw_mom(complete_edges,n)   
+    complete_edges /= np.amax(complete_edges)
+    Del_edges /= np.amax(complete_edges)
+    MST_edges /= np.amax(complete_edges)
     
-        features[n+13] = central_mom(Del_edges,n)    
-        features[n+18] = raw_mom(Del_edges,n)
-        
-        features[n+26] = central_mom(MST_edges,n)
-        features[n+31] = raw_mom(MST_edges,n)
-        
-    features[10] = np.max(complete_edges)
-    features[11] = np.min(complete_edges)
-    features[12] = np.mean(complete_edges)
-    features[23] = np.max(Del_edges)
-    features[24] = np.min(Del_edges)
-    features[25] = np.mean(Del_edges)
-    features[36] = np.max(MST_edges)
-    features[37] = np.min(MST_edges)
-    features[38] = np.mean(MST_edges)
+    features[0] = raw_mom(complete_edges,1)
+    features[1] = central_mom(complete_edges,2)
+    features[2] = normalised_mom(complete_edges,3)
+    features[3] = normalised_mom(complete_edges,4)
+    features[4] = np.max(complete_edges)
+    features[5] = np.min(complete_edges)
+    
+    features[6] = raw_mom(Del_edges,1)
+    features[7] = central_mom(Del_edges,2)
+    features[8] = normalised_mom(Del_edges,3)
+    features[9] = normalised_mom(Del_edges,4)
+    features[10] = np.max(Del_edges)
+    features[11] = np.min(Del_edges)
+    
+    features[12] = raw_mom(MST_edges,1)
+    features[13] = central_mom(MST_edges,2)
+    features[14] = normalised_mom(MST_edges,3)
+    features[15] = normalised_mom(MST_edges,4)
+    features[16] = np.max(MST_edges)
+    features[17] = np.min(MST_edges)
     
     return features
 
@@ -288,10 +285,6 @@ file_list = os.listdir(file_dir)
 
 H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
 sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
-
-sigma_targets, H_targets  = np.meshgrid(sigma_targets,H_targets)
-H_targets = H_targets.flatten()
-sigma_targets = sigma_targets.flatten()
 
 X = []
 y=[]

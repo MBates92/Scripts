@@ -127,10 +127,6 @@ file_list = os.listdir(file_dir)
 H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
 sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
 
-sigma_targets, H_targets  = np.meshgrid(sigma_targets,H_targets)
-H_targets = H_targets.flatten()
-sigma_targets = sigma_targets.flatten()
-
 plt.ioff()
 
 for i in range(len(file_list)):
@@ -144,3 +140,4 @@ for i in range(len(file_list)):
     plt.title(r'$H = '+str(H_targets[i])+',\sigma = '+str(sigma_targets[i])+'$')
     plt.savefig('../SpectralSynthesis/2D/VariateImages/'+name)
     plt.close(fig)
+    print(i)
