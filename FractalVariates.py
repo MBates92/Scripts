@@ -59,9 +59,8 @@ def variates(signal, population, noise = True, noise_std = 0.5, convert=False):
         
         #implementing Gaussian noise condition
         if noise == True:
-            for i in range(0,len(R)):
-                points[i,0] += np.random.normal(0,noise_std)
-                points[i,1] += np.random.normal(0,noise_std)
+            noise_vals = np.random.normal(0,noise_std,(len(R),2))
+            points += noise_vals
                 
     if len(signal.shape) == 3:
         #convert signal to a normalised PDF
@@ -115,29 +114,22 @@ def variates(signal, population, noise = True, noise_std = 0.5, convert=False):
 '''Initialisation'''
 ###############################################################################
 
-N=300 #number of stars
-
-###############################################################################
-'''Implementation'''
-###############################################################################
-
 file_dir = '../SpectralSynthesis/2D/Signal/'
 file_list = os.listdir(file_dir)
 
 H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
 sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
 
-plt.ioff()
+N = np.random.random_integers(100,300,len(H_targets))
+
+###############################################################################
+'''Implementation'''
+###############################################################################
 
 for i in range(len(file_list)):
     field = np.load(file_dir+file_list[i])
-    stars = variates(field,N)
+    stars = variates(field,N[i])
     name = file_list[i]
     name = name[:-4]
     np.save('../SpectralSynthesis/2D/Variates/'+file_list[i],stars)
-    fig = plt.figure()
-    plt.scatter(stars[:,0],stars[:,1],c='k',s=3.0)
-    plt.title(r'$H = '+str(H_targets[i])+',\sigma = '+str(sigma_targets[i])+'$')
-    plt.savefig('../SpectralSynthesis/2D/VariateImages/'+name)
-    plt.close(fig)
     print(i)

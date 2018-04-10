@@ -1,4 +1,3 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -155,7 +154,7 @@ N=1000
 Seed = 120
 
 sample_H = np.random.random(10000)
-sample_sigma = np.random.random(10000)*2
+sample_sigma = np.random.random(10000)*2 + 0.5
 
 np.save('../SpectralSynthesis/2D/target/H_sample',sample_H)
 np.save('../SpectralSynthesis/2D/target/sigma_sample',sample_sigma)
@@ -164,14 +163,16 @@ np.save('../SpectralSynthesis/2D/target/sigma_sample',sample_sigma)
 '''Implementing'''
 ###############################################################################
 
-plt.ioff()
-
 for i in range(0,len(sample_H)):
     X = SpectralSynthesis2D(N,sample_H[i],sample_sigma[i])
-    np.save('../SpectralSynthesis/2D/Signal/X_'+str(i),X)
-    fig = plt.figure()
-    plt.imshow(X)
-    plt.title(r'$H = '+str(sample_H[i])+',\sigma = '+str(sample_sigma[i])+'$')
-    plt.savefig('../SpectralSynthesis/2D/SignalImages/X_'+str(i))
-    plt.close(fig)
+    if i<10:
+        np.save('../SpectralSynthesis/2D/Signal/X_0000'+str(i),X)
+    elif i<100:
+        np.save('../SpectralSynthesis/2D/Signal/X_000'+str(i),X)
+    elif i<1000:
+        np.save('../SpectralSynthesis/2D/Signal/X_00'+str(i),X)
+    elif i<10000:
+        np.save('../SpectralSynthesis/2D/Signal/X_0'+str(i),X)
+    else:
+        np.save('../SpectralSynthesis/2D/Signal/X_'+str(i),X)        
     print(i)
