@@ -19,7 +19,7 @@ def PolyArea(x,y):
     
 def normalise(points):
     area = ConvexHull(points).volume
-    points /= area
+    points /= np.sqrt(area)
     return points
 
 ###############################################################################
@@ -55,7 +55,7 @@ def DTFE(points):
     return point_areas
 
 ###############################################################################
-
+A = 1.
 cluster_no = 7822
 cluster_no = "%05d" % (cluster_no,)
 
@@ -64,14 +64,8 @@ stars = normalise(stars)
 
 areas = DTFE(stars)
 
-x=stars[:,0]
-y=stars[:,1]
+densities = 1/areas
 
-xmin = np.min(x)
-xmax = np.max(x)
-ymin = np.min(y)
-ymax = np.max(y)
-
-plt.figure()
-plt.axis([xmin,xmax,ymin,ymax])
-plt.scatter(stars[:,0],stars[:,1])
+B = np.exp(A*(np.log(densities)-np.mean(densities))/np.std(densities))
+U = np.random.random(len(densities))
+R = 1 - U**B
