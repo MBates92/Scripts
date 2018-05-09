@@ -55,6 +55,19 @@ def DTFE(points):
     return point_areas
 
 ###############################################################################
+    
+def Bfn(points,A=1.):
+    return np.exp(A*(np.log(points)-np.mean(points))/np.std(points))
+
+###############################################################################
+    
+def Rank(points,A=1.):
+    U = np.random.random(len(points))
+    return 1 - U**Bfn(points,A)
+
+###############################################################################
+###############################################################################
+
 A = 1.
 cluster_no = 7822
 cluster_no = "%05d" % (cluster_no,)
@@ -65,7 +78,7 @@ stars = normalise(stars)
 areas = DTFE(stars)
 
 densities = 1/areas
+densities /= np.linalg.norm(densities)
+R_j = Rank(densities,A)
 
-B = np.exp(A*(np.log(densities)-np.mean(densities))/np.std(densities))
-U = np.random.random(len(densities))
-R = 1 - U**B
+plt.hist(densities)

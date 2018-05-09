@@ -39,8 +39,10 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
         
     i, j = np.meshgrid(range(-int(N/2),int(N/2)+1),range(-int(N/2),int(N/2)+1))
     
+    beta = 1+2*H
+
     k = (i*i+j*j)**(0.5)
-    rad = np.where(k>0.0,k**(-(H+1)),0.0)
+    rad = np.where(k>0.0,k**(-(beta*0.5)),0.0)
 
     phase = 2*np.pi*np.random.random((N+1,N+1))
 
