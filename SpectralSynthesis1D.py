@@ -23,11 +23,10 @@ def pink(N, state=None):
     X = np.random.randn(N//2+1) + 1j * np.random.randn(N//2+1)
     S = np.sqrt(np.arange(len(X))+1.)
     y = (irfft(X/S)).real
-    return X, S, y, normalize(y)
+    return normalize(y)
 
 def white(N):
-	state = np.random.RandomState()
-	return state.randn(N)
+	return np.random.randn(N)
 
 def ms(x):
     return (np.abs(x)**2.0).mean()
@@ -38,5 +37,3 @@ def normalize(y, x=None):
     else:
         x = 1.0
     return y * np.sqrt( x / ms(y) )
-
-X,S,y,n = pink(10000)

@@ -79,6 +79,10 @@ areas = DTFE(stars)
 
 densities = 1/areas
 densities /= np.linalg.norm(densities)
+log_densities = np.log(densities)
+mean_densities = np.mean(densities)
+std_densities = np.std(densities)
+numer = log_densities - mean_densities
+inside = numer/std_densities
+exp = np.exp(inside)
 R_j = Rank(densities,A)
-
-plt.hist(densities)

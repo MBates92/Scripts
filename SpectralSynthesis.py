@@ -1,24 +1,24 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 ###############################################################################
 '''Functions'''
 ###############################################################################
 
-def SpectralSynthesis2D(N,H,sigma,Seed=None):
+def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0):
     
     """
-    Function that returns a 2D Fractal Surface given the Hurst Parameter, the 
-    dimensions in 2D Euclidean Space, a random number seed and an amplification
-    component
+    Function that returns an E-D Fractal Surface given the edge length in
+    Euclidean Space, the Euclidean dimension, and the Hurst Parameter.
     
     ===Arguments===
     
     -N: integer
-        size of 2D Euclidean space
+        size of Euclidean space
     
-    -H: integer
+    -E: integer
+        Euclidean Dimension of the space
+    
+    -H: float
         Hurst Parameter
     
     -Seed: integer
@@ -30,98 +30,77 @@ def SpectralSynthesis2D(N,H,sigma,Seed=None):
     ===Returns===
     
     -signal: float
-        2D array of N size representing a Fractal Surface
+        E-D array of N size representing a Fractal Surface
     
     """
+    
+    a = axis
+    
+    beta = E+2*H
     
     if Seed != None:
         np.random.seed(int(Seed))  
         
-    i, j = np.meshgrid(range(-int(N/2),int(N/2)+1),range(-int(N/2),int(N/2)+1))
-    
-    beta = 1+2*H
-
-    k = (i*i+j*j)**(0.5)
+    range_list = []
+    for i in range(0,E):
+        range_list.append(range(-int(N/2),int(N/2)+1))
+        
+    c=0
+    for i in np.meshgrid(*range_list):
+        if c==0:
+            k=i*i
+        else:
+            k += i*i
+        c += 1
+            
+    k = k**0.5        
     rad = np.where(k>0.0,k**(-(beta*0.5)),0.0)
+    rad /= ((rad**2).sum())**0.5
+    phase = 2*np.pi*np.random.random(k.shape)
 
-    phase = 2*np.pi*np.random.random((N+1,N+1))
-
-    phaseneg = phase[slice(None,None,-1),slice(None,None,-1)]
-    phase = phase - phaseneg
+    phaseneg = phase[[slice(None,None,-1)]*E]
+    phase -= phaseneg
 
     A = rad*np.cos(phase)+rad*np.sin(phase)*1j 
        
-    A[0,:] = A[0,:] + A[-1,:]
-    A = np.delete(A,-1,0)
+    for i in range(0,E):
+        i_plus=[slice(None)]*E
+        i_plus[i]=-1
+        i_minus=[slice(None)]*E
+        i_minus[i]=0
+        A[i_minus] += A[i_plus]
+        indices=[slice(None)]*E
+        indices[i]=slice(None,-1)
+        A = A[indices]
     
-    A[:,0] = A[:,0] + A[:,-1]
-    A = np.delete(A,-1,1)  
+    offset = np.asarray(A.shape)/2
+    offset = offset.astype(int)
     
-    A = np.roll(A,int(N/2),axis = 0)
-    A = np.roll(A,int(N/2),axis = 1)
+    axis = np.arange(0,E)
     
-    signal = np.fft.ifft2(A)
-    signal = signal.real
-    signal *= sigma/np.std(np.abs(signal))
-    signal = np.exp(signal)
-    signal = COM(signal)
-    
-    return signal
-
-
-###############################################################################
-    
-def SpectralSynthesis3D(N,H,sigma,Seed=None):
-    
-    """
-    Function that returns a 3D Fractal Surface given the Hurst Parameter, the 
-    dimensions in 3D Euclidean Space, a random number seed and an amplification
-    component
-    
-    ===Arguments===
-    
-    -N: integer
-        size of 3D Euclidean space
-    
-    -H: integer
-        Hurst Parameter
-    
-    -Seed: integer
-        Seed for Random Number Generator
-    
-    -sigma: float
-        Parameter that controls amplification of the signal
-        
-    ===Returns===
-    
-    -signal: float
-        3D array of N size representing a Fractal Volume
-    
-    """
-    
-    if Seed != None:
-        np.random.seed(int(Seed))  
-        
-    i, j, k = np.meshgrid(range(1,N+1),range(1,N+1),
-                       range(1,N+1))
-    shape = np.shape(i)
-    print(shape)
-    
-    phase = 2*np.pi*np.random.random((N,N,N))
-    rad = (i*i+j*j+k*k)**(-(2*H + 3)/4)*np.random.normal(size=(N,N,N))
-    
-    phaseneg = phase[[slice(None,None,-1)]*3]
-    phase = phase - phaseneg
-    
-    A = rad*np.cos(phase)+rad*np.sin(phase)*1j
+    A = np.roll(A,offset,axis)
     
     X = np.fft.ifftn(A)
-    signal = X.real
-    signal = signal*sigma/np.std(np.abs(signal))
-    signal = np.exp(signal)
-    signal = COM(signal)
+    X = X.real
+    X *= sigma/np.std(X)
+    X = np.exp(X)    
+    
+    if projected != None:
+        if len(X.shape) != 3:
+            if len(X.shape) == 2:
+                print("Field is already in 2D")
+                return COM(X)
+            else:
+                print("Please specify 3D field")
+                print("Returning non-projected field")
+                return COM(X)
+        X = np.sum(X,axis=a)    
+        X *= 1./np.std(X)  
         
-    return signal
+    X = COM(X)
+    
+    return X
+
 
 ###############################################################################
 
@@ -149,32 +128,4 @@ def COM(X):
     return X
 
 ###############################################################################
-'''Initialisation'''
-###############################################################################
     
-N=1000
-Seed = 120
-
-sample_H = np.random.random(10000)
-sample_sigma = np.random.random(10000)*2 + 0.5
-
-np.save('../SpectralSynthesis/2D/target/H_sample',sample_H)
-np.save('../SpectralSynthesis/2D/target/sigma_sample',sample_sigma)
-
-###############################################################################
-'''Implementing'''
-###############################################################################
-
-for i in range(0,len(sample_H)):
-    X = SpectralSynthesis2D(N,sample_H[i],sample_sigma[i])
-    if i<10:
-        np.save('../SpectralSynthesis/2D/Signal/X_0000'+str(i),X)
-    elif i<100:
-        np.save('../SpectralSynthesis/2D/Signal/X_000'+str(i),X)
-    elif i<1000:
-        np.save('../SpectralSynthesis/2D/Signal/X_00'+str(i),X)
-    elif i<10000:
-        np.save('../SpectralSynthesis/2D/Signal/X_0'+str(i),X)
-    else:
-        np.save('../SpectralSynthesis/2D/Signal/X_'+str(i),X)        
-    print(i)
