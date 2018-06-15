@@ -4,7 +4,7 @@ import numpy as np
 '''Functions'''
 ###############################################################################
 
-def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0):
+def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0, exp=True):
     
     """
     Function that returns an E-D Fractal Surface given the edge length in
@@ -83,7 +83,9 @@ def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0):
     X = np.fft.ifftn(A)
     X = X.real
     X *= sigma/np.std(X)
-    X = np.exp(X)    
+    
+    if exp == True:
+        X = np.exp(X)    
     
     if projected != None:
         if len(X.shape) != 3:
