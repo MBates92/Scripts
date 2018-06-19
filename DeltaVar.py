@@ -18,19 +18,22 @@ def DeltaVar(X,L,v, method = 'fourier'):
         #constructing the filter grid
         shape = np.shape(X)
         N = shape[0]
-        x = np.linspace(-2**-0.5,2**-0.5,N)
-        y = np.linspace(-2**-0.5,2**-0.5,N)
+        x = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
+        y = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
         xv, yv = np.meshgrid(x,y)
         
         #calculate radial coordinate for each point
         r = np.sqrt(xv**2 + yv**2)
+        r /= np.max(r)
         
         #produce filter
         f = MexicanHat(r,L,v)
         
-        g = convolve(X,f, normalize_kernel = False, nan_treatment = 'fill')
+        g = convolve(X,f, normalize_kernel = False, nan_treatment = 'fill', allow_huge=True)
         
-        deltavar = 1/(2*np.pi) * np.mean(g**2)
+        deltavar = np.mean(np.power(g,2), dtype=np.float64)
+
+        deltavar /= (2*np.pi)
         
         return deltavar
     
@@ -48,6 +51,7 @@ def DeltaVar(X,L,v, method = 'fourier'):
         
         #calculate radial coordinate for each point
         r = np.sqrt(xv**2 + yv**2)
+        r /=np.max(r)
         
         #produce filter
         f = MexicanHat(r,L,v)

@@ -55,7 +55,7 @@ def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0, exp=True):
             
     k = k**0.5        
     rad = np.where(k>0.0,k**(-(beta*0.5)),0.0)
-    rad /= ((rad**2).sum())**0.5
+    rad/=np.sqrt((rad**2).sum())
     phase = 2*np.pi*np.random.random(k.shape)
 
     phaseneg = phase[[slice(None,None,-1)]*E]
