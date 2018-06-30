@@ -12,7 +12,7 @@ def MexicanHat(r,L,v):
                    np.exp(-r**2/(L/2)**2))
     return core - annulus
 
-def DeltaVar(X,L,v, method = 'fourier'):
+def DeltaVar(X,L,v, method = 'convolve'):
     
     if method == 'convolve':
         #constructing the filter grid
@@ -91,6 +91,6 @@ def HurstEstimator(sigma_d,L,shift=0.5):
     
     std_H = std_A/2
     
-    params = ([H,std_H],[A,std_A],[B,std_B])
+    params = ([H,std_H, A,std_A,B,std_B])
     
     return params
