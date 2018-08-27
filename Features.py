@@ -212,7 +212,7 @@ def DelaunayTriangulation(points,plot = None):
     
     Del_tri = tri.Triangulation(points[:,0],points[:,1])
     Del_edges = Del_tri.edges
-    Del_edges = stars[Del_edges]
+    Del_edges = points[Del_edges]
 
     x_coords = Del_edges[:,:,0].T
     y_coords = Del_edges[:,:,1].T
@@ -510,61 +510,3 @@ def features(points, histogram = None, plots = None):
     features[44] = Qmeasure(points)
     
     return features
-
-###############################################################################
-'''Input and Initialisation'''
-###############################################################################
-
-file_dir = '../SpectralSynthesis/2D/Variates/'
-file_list = os.listdir(file_dir)
-
-H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
-sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
-
-X = []
-y=[]
-
-###############################################################################
-'''Implementation'''
-###############################################################################
-'''
-stars = np.load(file_dir+file_list[200])
-
-centroid = (np.mean(stars[:,0])),(np.mean(stars[:,1]))
-stars[:,0] -=centroid[0]
-stars[:,1] -=centroid[1]
-stars /= np.amax(stars)
-plt.figure()
-plt.scatter(stars[:,0],stars[:,1],c='k',s=2)
-plt.grid(True)
-plt.xlabel(r'$x$')
-plt.ylabel(r'$y$')
-plt.title('Star Cluster 200')
-
-
-'''
-for i in range(len(file_list)):
-    stars = np.load(file_dir+file_list[i])
-    centroid = (np.mean(stars[:,0])),(np.mean(stars[:,1]))
-    stars[:,0] -= centroid[0]
-    stars[:,1] -= centroid[1]
-    stars /= np.amax(stars)
-    X_i = features(stars)
-    X.append(X_i)
-    print(i)
-
-X = np.asarray(X)
-y.append(H_targets)
-y.append(sigma_targets)
-y=np.asarray(y)
-np.save('../SpectralSynthesis/2D/features',X)
-np.save('../SpectralSynthesis/2D/targets',y)
-
-plt.figure()
-plt.scatter(X[:,44],sigma_targets, c=H_targets)
-plt.xlabel(r'$Q$')
-plt.ylabel(r'$\sigma$')
-cb = plt.colorbar()
-cb.set_label(r'$H$')
-plt.grid(True)
-plt.savefig('../SpectralSynthesis/MiscImages/Q_valuessigma.png', dpi=1200)

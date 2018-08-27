@@ -26,7 +26,7 @@ def RMSE(y_actual,y_predict):
     return np.sqrt(np.sum((y_actual-y_predict)**2)/len(y_actual))
 
 ###############################################################################
-
+'''
 idx = np.array([12,13,14,15,16,17])
 
 X = np.load('../SpectralSynthesis/2D/features.npy')
@@ -86,4 +86,4 @@ plt.xlim([0.5,2.5])
 plt.xlabel(r'$\sigma_{actual}$')
 plt.ylabel(r'$\sigma_{predicted}$')
 plt.title(r'$\sigma $, All Features')
-plt.savefig('../SpectralSynthesis/MiscImages/sigmaAll.png', dpi=1200)
+plt.savefig('../SpectralSynthesis/MiscImages/sigmaAll.png', dpi=1200)'''
