@@ -81,3 +81,25 @@ def maxima2D(data, threshold = 0, size = 5):
     return coords
     
 ###############################################################################
+
+def Pearson(y_actual,y_predict):
+    Y_actual = np.mean(y_actual)
+    Y_predict = np.mean(y_predict)
+    diff_actual = y_actual-Y_actual
+    diff_predict = y_predict-Y_predict
+    numerator = np.sum(diff_actual*diff_predict)
+    denom = np.sqrt(np.sum(diff_actual**2))*np.sqrt(np.sum(diff_predict**2))
+    
+    return numerator/denom
+
+###############################################################################
+    
+def root_mean_square_error(y_actual,y_predict):
+    
+    return np.sqrt(np.sum((y_actual-y_predict)**2)/len(y_actual))
+
+###############################################################################
+    
+def mean_square_error(y_actual,y_predict):
+    
+    return np.sum((y_actual-y_predict)**2)/len(y_actual)
