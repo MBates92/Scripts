@@ -103,3 +103,28 @@ def root_mean_square_error(y_actual,y_predict):
 def mean_square_error(y_actual,y_predict):
     
     return np.sum((y_actual-y_predict)**2)/len(y_actual)
+
+###############################################################################
+
+def COM(X):
+    theta_i=[]
+    for i in range(len(X.shape)):
+        theta_i.append(np.arange(X.shape[i],
+                                 dtype=np.double)*2.*np.pi/(X.shape[i]))
+        
+    # convert to grid format
+    theta=np.meshgrid(*theta_i,indexing='ij')
+    
+    # loop over axes
+    for i in range(len(theta)):
+        
+        # calculate shift
+        xi=np.cos(theta[i])*np.abs(X)
+        zeta=np.sin(theta[i])*np.abs(X)
+        theta_bar=np.arctan2(-zeta.mean(),-xi.mean())+np.pi
+        shift=np.int((X.shape[i])*0.5*theta_bar/np.pi)
+        
+        # shift array
+        X=np.roll(X,int(X.shape[i]/2)-shift,i)
+    
+    return X    

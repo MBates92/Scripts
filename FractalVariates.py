@@ -30,7 +30,7 @@ def variates(signal, population, noise = True, noise_std = 0.5, convert=False):
     ===Returns===
     
     -points: float
-        2D array of size (number,2) consisting of coordinates of variates
+        2D array of size (population,2) consisting of coordinates of variates
     
     """
     if len(signal.shape) == 2:
@@ -109,27 +109,3 @@ def variates(signal, population, noise = True, noise_std = 0.5, convert=False):
         if convert == True:
             np.delete(points,2,1)
     return points
-
-###############################################################################
-'''Initialisation'''
-###############################################################################
-
-file_dir = '../SpectralSynthesis/2D/Signal/'
-file_list = os.listdir(file_dir)
-
-H_targets = np.load('../SpectralSynthesis/2D/target/H_sample.npy')
-sigma_targets = np.load('../SpectralSynthesis/2D/target/sigma_sample.npy')
-
-N = np.random.random_integers(100,300,len(H_targets))
-
-###############################################################################
-'''Implementation'''
-###############################################################################
-
-for i in range(len(file_list)):
-    field = np.load(file_dir+file_list[i])
-    stars = variates(field,N[i])
-    name = file_list[i]
-    name = name[:-4]
-    np.save('../SpectralSynthesis/2D/Variates/'+file_list[i],stars)
-    print(i)

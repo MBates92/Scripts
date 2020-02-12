@@ -5,7 +5,7 @@ import numpy as np
 '''Functions'''
 ###############################################################################
 
-def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0, exp=True):
+def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0, exp=True, centred = True):
     
     """
     Function that returns an E-D Fractal Surface given the edge length in
@@ -99,8 +99,9 @@ def fBm(N, E, H, sigma=1., Seed=None, projected = None, axis = 0, exp=True):
                 return COM(X)
         X = np.sum(X,axis=a)    
         X *= 1./np.std(X)  
-        
-    X = COM(X)
+    
+    if centred:    
+    	X = COM(X)
     
     return X
 

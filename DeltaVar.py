@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.convolution import convolve_fft as convolve
 from scipy.optimize import curve_fit
 from scipy.interpolate import UnivariateSpline
+from Math import COM
 
 def f(x, A, B):
     return A*x + B
@@ -11,49 +11,26 @@ def MexicanHat(r,L,v=1.5):
     core = 4/(np.pi*L**2) * np.exp(-r**2/(L/2)**2)
     annulus = 4 / (np.pi*L**2*(v**2-1))*(np.exp(-r**2/(v*L/2)**2)-
                    np.exp(-r**2/(L/2)**2))
-    return core - annulus
 
-def DeltaVar(X,L,v, method = 'fourier'):
-    
-    if method == 'convolve':
+    return core, annulus
+
+def DeltaVar(X,L,v=1.5, periodicity = False):
+    if periodicity == True:
         #constructing the filter grid
         shape = np.shape(X)
         N = shape[0]
         x = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
         y = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
         xv, yv = np.meshgrid(x,y)
-        
-        #calculate radial coordinate for each point
-        r = np.sqrt(xv**2 + yv**2)
-        r /= np.max(r)
-
-        #produce filter
-        f = MexicanHat(r,L,v)
-        
-        g = convolve(X,f, normalize_kernel = False, nan_treatment = 'fill', allow_huge=True)
-        
-        deltavar = g.var()
-        
-        return deltavar
-    
-    if method == 'fourier':
-    
-        #constructing the filter grid
-        shape = np.shape(X)
-        N = shape[0]
-        x = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
-        y = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
-        xv, yv = np.meshgrid(x,y)
-        
-        xv = xv - np.max(xv)/2
-        yv = yv - np.max(yv)/2
         
         #calculate radial coordinate for each point
         r = np.sqrt(xv**2 + yv**2)
         r /=np.max(r)
         
         #produce filter
-        f = MexicanHat(r,L,v)
+        core, annulus = MexicanHat(r,L,v)
+
+        f = core - annulus
         
         f_fft = np.fft.fftn(f)
         X_fft = np.fft.fftn(X)
@@ -63,8 +40,69 @@ def DeltaVar(X,L,v, method = 'fourier'):
         g=np.fft.ifftn(prod).real
 
         deltavar = g.var()
+    
+    if periodicity == False:
+        #padding the image
+        shape = np.shape(X)
+        img_size = shape[0]
+        N = img_size*2
+        x = np.zeros((N,N))
+        x[:img_size,:img_size] = X
+        X = x
+
+        #constructing the filter grid
+        x = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
+        y = np.linspace(-2**-0.5,2**-0.5,N, dtype=np.float64)
+        xv, yv = np.meshgrid(x,y)
         
-        return deltavar
+        #calculate radial coordinate for each point
+        r = np.sqrt(xv**2 + yv**2)
+        r /=np.max(r)
+
+        r = np.roll(r,int(N/2),0)
+        r = np.roll(r,int(N/2),1)
+        
+        #produce filter functions
+        core, annulus = MexicanHat(r,L,v)
+        core = core/np.sum(core)
+        annulus = annulus/np.sum(annulus)
+
+        #producing weightings
+        zeros = np.zeros((N,N))
+        ones = np.ones((img_size,img_size))
+        zeros[:img_size,:img_size] = ones
+        w = zeros
+
+        #performing convolutions and trimming
+        #FIELD (*) CORE
+        prod = np.fft.fftn(X)*np.fft.fftn(core)
+        G_core = np.fft.ifftn(prod).real
+        G_core = G_core[:img_size,:img_size]
+
+        #FIELD (*) ANNULUS
+        prod = np.fft.fftn(X)*np.fft.fftn(annulus)
+        G_annulus = np.fft.ifftn(prod).real
+        G_annulus = G_annulus[:img_size,:img_size]
+
+        #WEIGHTS (*) CORE
+        prod = np.fft.fftn(w)*np.fft.fftn(core)
+        W_core = np.fft.ifftn(prod).real
+        W_core = W_core[:img_size,:img_size]
+
+        #WEIGHTS (*) ANNULUS
+        prod = np.fft.fftn(w)*np.fft.fftn(annulus)
+        W_annulus = np.fft.ifftn(prod).real
+        W_annulus = W_annulus[:img_size,:img_size]
+
+        #Producing full convolution
+        F = (G_core/W_core)-(G_annulus/W_annulus)
+
+        #Calculating DeltaVariance
+        F_mean = np.mean(F)
+        W_tot = W_core*W_annulus
+        deltavar = np.sum(((F-F_mean)**2)*(W_tot))/np.sum(W_tot)
+
+    return deltavar
 
 def HurstEstimator(sigma_d,L,shift=0.5):
         
